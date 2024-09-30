@@ -46,15 +46,34 @@ def book(competition,club):
     else:
         flash("Something went wrong-please try again")
         return redirect(url_for('showSummary'))
-
-
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
+    club = next((c for c in clubs if c['name'] == request.form['club']), None)
     placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    flash('Great-booking complete!')
+
+    # Log pour le débogage
+    print(f"Requested competition: {request.form['competition']}, Requested club: {request.form['club']}, Places required: {placesRequired}")
+    print(f"Found competition: {competition}, Found club: {club}")
+
+    if competition and club:
+        available_places = int(competition['numberOfPlaces'])
+        club_points = int(club['points'])  # Convertir les points en entier
+
+        # Validation : Vérifier si les places demandées ne dépassent pas les places disponibles
+        if placesRequired <= available_places:
+            # Validation : Vérifier si le club a suffisamment de points
+            if club_points >= placesRequired:
+                competition['numberOfPlaces'] = available_places - placesRequired
+                club['points'] = club_points - placesRequired  # Déduire les points
+                flash('Great - booking complete!')
+            else:
+                flash('Not enough points available for this booking.')
+        else:
+            flash('Not enough places available.')
+    else:
+        flash('Something went wrong - please try again.')
+
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
