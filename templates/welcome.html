@@ -1,36 +1,96 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary | GUDLFT Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .flash-messages {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .flash-messages ul {
+            list-style: none;
+            padding: 0;
+        }
+        .flash-messages li {
+            margin: 5px 0;
+        }
+        .competition {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .available {
+            color: #27ae60; /* Green for available */
+        }
+        .not-available {
+            color: #e74c3c; /* Red for not available */
+        }
+    </style>
 </head>
 <body>
-        <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
+    <div class="container">
+        <h2>Welcome, {{ club['email'] }}</h2>
+        <a href="{{ url_for('logout') }}">Logout</a>
 
-    {% with messages = get_flashed_messages()%}
-    {% if messages %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <p>Points available: <strong>{{ club['points'] }}</strong></p>
+        <h3>Competitions:</h3>
         <ul>
-       {% for message in messages %}
-            <li>{{message}}</li>
-        {% endfor %}
-       </ul>
-    {% endif%}
-    Points available: {{club['points']}}
-    <h3>Competitions:</h3>
-    <ul>
-        {% for comp in competitions%}
-        <li>
-            {{comp['name']}}<br />
-            Date: {{comp['date']}}</br>
-            Number of Places: {{comp['numberOfPlaces']}}
-            {%if comp['numberOfPlaces']|int >0%}
-            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
-            {%endif%}
-        </li>
-        <hr />
-        {% endfor %}
-    </ul>
-    {%endwith%}
-
+            {% for comp in competitions %}
+            <li class="competition">
+                <strong>{{ comp['name'] }}</strong><br />
+                Date: {{ comp['date'] }}<br />
+                Number of Places: <span class="{% if comp['numberOfPlaces']|int > 0 %}available{% else %}not-available{% endif %}">
+                {{ comp['numberOfPlaces'] }}</span>
+                {% if comp['numberOfPlaces']|int > 0 %}
+                <br /><a href="{{ url_for('book', competition=comp['name'], club=club['name']) }}">Book Places</a>
+                {% else %}
+                <br /><span style="color: #e74c3c;">No places available</span>
+                {% endif %}
+            </li>
+            <hr />
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>
