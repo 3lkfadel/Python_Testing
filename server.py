@@ -4,14 +4,14 @@ from flask import Flask,render_template,request,redirect,flash,url_for
 
 def loadClubs():
     with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
+        listOfClubs = json.load(c)['clubs']
+        return listOfClubs
 
 
 def loadCompetitions():
     with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+        listOfCompetitions = json.load(comps)['competitions']
+        return listOfCompetitions
 
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ clubs = loadClubs()
 def index():
     return render_template('index.html')
 
- #ici j'ai fais en sorte que si le mails n'est pas dans liste et que l'utisateur  
+#ici j'ai fais en sorte que si le mails n'est pas dans liste et que l'utisateur  
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
     email = request.form['email']
@@ -48,13 +48,13 @@ def book(competition,club):
 
 # Global list to store reservations
 reservations = []
-
-@app.route('/purchasePlaces', methods=['POST'])
 @app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
     club = next((c for c in clubs if c['name'] == request.form['club']), None)
     placesRequired = int(request.form['places'])
+
+    print(f"Club: {club}, Competition: {competition}, Places Required: {placesRequired}")  # Débogage
 
     # Vérification du nombre de places disponibles
     if placesRequired > int(competition['numberOfPlaces']):
@@ -87,3 +87,6 @@ def purchasePlaces():
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
