@@ -52,12 +52,24 @@ reservations = []
 def purchasePlaces():
     competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
     club = next((c for c in clubs if c['name'] == request.form['club']), None)
-    placesRequired = int(request.form['places'])
 
-    print(f"Club: {club}, Competition: {competition}, Places Required: {placesRequired}")  # Débogage
+    # Vérifie si la compétition et le club existent
+    if not competition or not club:
+        flash("La compétition ou le club n'existe pas.")
+        return redirect(url_for('index'))
+
+    try:
+        placesRequired = int(request.form['places'])  # Convertit en entier
+    except ValueError:
+        flash("Le nombre de places doit être un nombre valide.")
+        return redirect(url_for('book', competition=competition['name'], club=club['name']))
+
+    # Convertir les chaînes de caractères en entiers
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])
+    club['points'] = int(club['points'])
 
     # Vérification du nombre de places disponibles
-    if placesRequired > int(competition['numberOfPlaces']):
+    if placesRequired > competition['numberOfPlaces']:
         flash("Pas assez de places disponibles.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
 
@@ -67,8 +79,8 @@ def purchasePlaces():
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
 
     # Réduire le nombre de places disponibles et les points du club
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-    club['points'] -= placesRequired  # Diminuer les points en fonction des places réservées
+    competition['numberOfPlaces'] -= placesRequired
+    club['points'] -= placesRequired
 
     # Ajouter la réservation à la liste des réservations
     reservations.append({
@@ -79,6 +91,7 @@ def purchasePlaces():
 
     flash('Réservation effectuée avec succès !')
     return render_template('welcome.html', club=club, competitions=competitions, reservations=reservations)
+
 
 
 # TODO: Add route for points display
