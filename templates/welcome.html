@@ -1,36 +1,125 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summary | GUDLFT Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        a {
+            text-decoration: none;
+            color: #ff5c5c;
+            font-weight: bold;
+        }
+        .logout {
+            float: right;
+            margin-top: -40px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+        .message {
+            color: red;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .competitions {
+            margin-top: 20px;
+        }
+        .card {
+            display: inline-block;
+            width: 100%;
+        }
+        @media (min-width: 600px) {
+            .card {
+                width: 45%;
+                margin-right: 10px;
+            }
+        }
+        .book-btn {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        .book-btn:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-        <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
 
-    {% with messages = get_flashed_messages()%}
+    <h2>Bienvenue, {{club['email']}} !</h2>
+    <a href="{{url_for('logout')}}" class="logout">Déconnexion</a>
+
+    <!-- Messages d'erreur -->
+    {% with messages = get_flashed_messages() %}
     {% if messages %}
+        <div class="message">
+            <ul>
+            {% for message in messages %}
+                <li>{{message}}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <p>Points disponibles: <strong>{{club['points']}}</strong></p>
+
+    <h3>Compétitions:</h3>
+
+    <div class="competitions">
+        <h4>Compétitions disponibles</h4>
         <ul>
-       {% for message in messages %}
-            <li>{{message}}</li>
-        {% endfor %}
-       </ul>
-    {% endif%}
-    Points available: {{club['points']}}
-    <h3>Competitions:</h3>
-    <ul>
-        {% for comp in competitions%}
-        <li>
-            {{comp['name']}}<br />
-            Date: {{comp['date']}}</br>
-            Number of Places: {{comp['numberOfPlaces']}}
-            {%if comp['numberOfPlaces']|int >0%}
-            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
-            {%endif%}
-        </li>
-        <hr />
-        {% endfor %}
-    </ul>
-    {%endwith%}
+            {% for comp in competitions %}
+            {% if comp['numberOfPlaces']|int > 0 %}
+            <li class="card">
+                <h5>{{comp['name']}}</h5>
+                <p>Date: {{comp['date']}}</p>
+                <p>Nombre de places: {{comp['numberOfPlaces']}}</p>
+                <a href="{{ url_for('book', competition=comp['name'], club=club['name']) }}" class="book-btn">Réserver des places</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+
+        <h4>Compétitions complètes</h4>
+        <ul>
+            {% for comp in competitions %}
+            {% if comp['numberOfPlaces']|int == 0 %}
+            <li class="card">
+                <h5>{{comp['name']}}</h5>
+                <p>Date: {{comp['date']}}</p>
+                <p><strong>Complet</strong></p>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
 
 </body>
 </html>
