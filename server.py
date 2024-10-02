@@ -46,23 +46,32 @@ def book(competition,club):
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
 
+# Global list to store reservations
+reservations = []
 
-@app.route('/purchasePlaces',methods=['POST'])
+@app.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
+    
+    # Vérification du nombre de places disponibles
     if placesRequired > int(competition['numberOfPlaces']):
         flash("Pas assez de places disponibles.")
         return redirect(url_for('book', competition=competition['name'], club=club['name']))
-    else:
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-        flash('Great-booking complete!')
-        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+    
+    # Ajouter la réservation à la liste des réservations
+    reservations.append({
+        'club': club['name'],
+        'competition': competition['name'],
+        'places': placesRequired
+    })
+    
+    flash('Réservation effectuée avec succès !')
+    return render_template('welcome.html', club=club, competitions=competitions, reservations=reservations)
 
-@app.route('/points')
-def points():
-    return render_template('points.html', clubs=clubs)
 
 # TODO: Add route for points display
 
